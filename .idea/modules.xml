@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/nachos-idea01.iml" filepath="$PROJECT_DIR$/nachos-idea01.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nachos-idea.iml" filepath="$PROJECT_DIR$/nachos-idea.iml" />
     </modules>
   </component>
 </project>
