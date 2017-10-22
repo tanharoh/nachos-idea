@@ -28,6 +28,10 @@ import nachos.machine.*;
  * </pre></blockquote>
  */
 public class KThread {
+    // 检查 Join()是否执行过
+    private boolean isJoined = false;
+    private ThreadQueue joinQueue = null;
+
     /**
      * Get the current thread.
      *
@@ -61,7 +65,7 @@ public class KThread {
     /**
      * Allocate a new KThread.
      *
-     * @param    target    the object whose <tt>run</tt> method is called.
+     * @param target the object whose <tt>run</tt> method is called.
      */
     public KThread(Runnable target) {
         this();
@@ -71,7 +75,7 @@ public class KThread {
     /**
      * Set the target of this thread.
      *
-     * @param    target    the object whose <tt>run</tt> method is called.
+     * @param target the object whose <tt>run</tt> method is called.
      * @return this thread.
      */
     public KThread setTarget(Runnable target) {
@@ -85,7 +89,7 @@ public class KThread {
      * Set the name of this thread. This name is used for debugging purposes
      * only.
      *
-     * @param    name    the name to give to this thread.
+     * @param name the name to give to this thread.
      * @return this thread.
      */
     public KThread setName(String name) {
@@ -276,6 +280,19 @@ public class KThread {
 
         Lib.assertTrue(this != currentThread);
 
+        // P1T1
+        // 如果调用结束则退出
+        if (this.status == statusFinished) {
+            return;
+        }
+        boolean inStatus = Machine.interrupt().disabled();
+        if (!KThread.currentThread.isJoined){
+            joinQueue = ThreadedKernel.scheduler.newThreadQueue(true);
+            joinQueue.waitForAccess(currentThread);
+            isJoined = true;
+            sleep();
+        }
+        Machine.interrupt().restore(inStatus);
     }
 
     /**
@@ -330,9 +347,9 @@ public class KThread {
      * changed from running to blocked or ready (depending on whether the
      * thread is sleeping or yielding).
      *
-     * @param    finishing    <tt>true</tt> if the current thread is
-     * finished, and should be destroyed by the new
-     * thread.
+     * @param finishing <tt>true</tt> if the current thread is
+     *                  finished, and should be destroyed by the new
+     *                  thread.
      */
     private void run() {
         Lib.assertTrue(Machine.interrupt().disabled());
@@ -413,7 +430,7 @@ public class KThread {
     /**
      * Additional state used by schedulers.
      *
-     * @see    nachos.threads.PriorityScheduler.ThreadState
+     * @see nachos.threads.PriorityScheduler.ThreadState
      */
     public Object schedulingState = null;
 
